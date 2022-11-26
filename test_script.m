@@ -181,15 +181,31 @@ disp(c);
 %%
 % a = regionprops('table', I_segm, 'basic');
 %% Poprawianie ręczne masek - dodać jako nową funkcjonalność
-imgNum = '0886';
+imgNum = '01';
 path = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageDB/';
 imageName = cat(2, imgNum, '_fundus.jpg');
-I = imread(cat(2, path, imageName));
-imshow(I)
-roi = drawellipse();
+try    
+    I = imread(cat(2, path, imageName));
+catch
+    disp('There was an error')
+end
+%imshow(I)
+% roi = drawellipse();
 %%
 savePath = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT/';
 GTImageName = cat(2, imgNum, '_fundus_GT.jpg');
 mask = createMask(roi);
 imwrite(mask, cat(2, savePath, GTImageName));
 clc,clear,close
+
+%% Test
+% data = rand(140, 4);
+% c = cell(140, 4);
+% for i = 1:140
+%     for j = 1:4
+%         c{i,j} = data(i,j);
+%     end
+% end
+p1 = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageMASKS';
+p2 = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT';
+POROWNAJ_MASKI(p1, p2, 'folder');
