@@ -199,13 +199,29 @@ imwrite(mask, cat(2, savePath, GTImageName));
 clc,clear,close
 
 %% Test
-% data = rand(140, 4);
-% c = cell(140, 4);
-% for i = 1:140
-%     for j = 1:4
-%         c{i,j} = data(i,j);
-%     end
-% end
 p1 = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageMASKS';
 p2 = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT';
 POROWNAJ_MASKI(p1, p2, 'folder');
+
+%% Normalize Ground Truth Mask
+path = "/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT/";
+savePath = "/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/TEST/";
+info = dir(path);
+elemslist = natsort({info(:).name});
+elemslist(ismember(elemslist,{'.','..','.DS_Store'}))=[];
+for i = 1 : length(elemslist)
+    I = imread(path+elemslist{i});
+    [a,b,c] = fileparts(path+elemslist{i});
+    for j = 1:512
+        for k=1:512
+            if I(j,k) < 100
+                I(j,k) = 0;
+            end
+            if I(j,k) < 255 && I(j,k) > 200
+                I(j,k) = 255;
+            end
+        end
+    end
+    
+    imwrite(I, savePath + b + '.png')
+end
