@@ -48,55 +48,8 @@ figure
 imshowpair(I, buildingMask,'montage')
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Creating a SSN ~ network
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% inputSize = [512 512 3];
-% imgLayer = imageInputLayer(inputSize);
-% 
-% filterSize = 3;
-% numFilters = 512;
-% conv = convolution2dLayer(filterSize,numFilters,'Padding',1);
-% relu = reluLayer();
-% 
-% poolSize = 2;
-% maxPoolDownsample2x = maxPooling2dLayer(poolSize,'Stride',2);
-% 
-% downsamplingLayers = [
-%     conv
-%     relu
-%     maxPoolDownsample2x
-%     conv
-%     relu
-%     maxPoolDownsample2x
-%     ];
-% 
-% filterSize = 4;
-% transposedConvUpsample2x = transposedConv2dLayer(4,numFilters,'Stride', ...
-%     2,'Cropping',1);
-% 
-% upsamplingLayers = [
-%     transposedConvUpsample2x
-%     relu
-%     transposedConvUpsample2x
-%     relu
-%     ];
-% 
-% numClasses = 3;
-% conv1x1 = convolution2dLayer(1,numClasses);
-% 
-% finalLayers = [
-%     conv1x1
-%     softmaxLayer()
-%     pixelClassificationLayer()
-%     ];
-% 
-% netLayers = [
-%     imgLayer    
-%     downsamplingLayers
-%     upsamplingLayers
-%     finalLayers
-%     ];
-
-numFilters = 64;
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+numFilters = 512;
 filterSize = 3;
 numClasses = 2;
 netLayers = [
@@ -124,8 +77,10 @@ pxds = pixelLabelDatastore(pxDir, classNames, labelIDs);
 
 opts = trainingOptions('sgdm', ...
     'InitialLearnRate',1e-3, ...
-    'MaxEpochs',100, ...
-    'MiniBatchSize',64);
+    'MaxEpochs',10, ...
+    'MiniBatchSize',10, ...
+    'ExecutionEnvironment', 'parallel', ...
+    'Plots', 'training-progress');
 
 trainingData = combine(imds, pxds);
 
