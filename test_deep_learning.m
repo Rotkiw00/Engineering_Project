@@ -19,10 +19,10 @@ end
 %% Semantic Segmentation with Deep Learning
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-imgDir = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageDB';
+imgDir = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageDB_128';
 imds = imageDatastore(imgDir);
 
-pxDir = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT';
+pxDir = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT_128';
 classNames = ["opticDisk", "background"];
 labelIDs = [255 0];
 pxds = pixelLabelDatastore(pxDir, classNames, labelIDs);
@@ -33,8 +33,8 @@ pxds = pixelLabelDatastore(pxDir, classNames, labelIDs);
 %     segmentLabels = categorical(segArray); C{i} = segmentLabels;
 % end
 
-I = readimage(imds,5);
-BW_ = readimage(pxds, 5);
+I = readimage(imds,11);
+BW_ = readimage(pxds, 11);
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% wyświetlanie - test
 subplot(121)
@@ -49,11 +49,11 @@ imshowpair(I, buildingMask,'montage')
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 1. Creating a SSN ~ network
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-numFilters = 512;
+numFilters = 256; %256
 filterSize = 3;
 numClasses = 2;
 netLayers = [
-    imageInputLayer([512 512 3])
+    imageInputLayer([128 128 3])
     convolution2dLayer(filterSize,numFilters,'Padding',1)
     reluLayer()
     maxPooling2dLayer(2,'Stride',2)
@@ -67,24 +67,39 @@ netLayers = [
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 2. Initialize and combine training data
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-imgDir = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageDB';
+imgDir = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageDB_128';
 imds = imageDatastore(imgDir);
 
-pxDir = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT';
+pxDir = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT_128';
 classNames = ["opticDisk", "background"];
 labelIDs = [255 0];
 pxds = pixelLabelDatastore(pxDir, classNames, labelIDs);
 
 opts = trainingOptions('sgdm', ...
     'InitialLearnRate',1e-3, ...
-    'MaxEpochs',10, ...
-    'MiniBatchSize',10, ...
-    'ExecutionEnvironment', 'parallel', ...
-    'Plots', 'training-progress');
+    'MaxEpochs',50, ...
+    'MiniBatchSize',60, ...
+    'Plots','training-progress');
+
+%'ExecutionEnvironment', 'parallel'
 
 trainingData = combine(imds, pxds);
-
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% 3. Train created network
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 net = trainNetwork(trainingData, netLayers, opts);
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 4. Save trained network
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+save net;
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% 5. Sprawdzenie 'net'
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+testImage = imread('/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageDB_128/0309_fundus.png');
+imshow(testImage);
+C = semanticseg(testImage,net);
+B = labeloverlay(testImage, C, 'IncludedLabels', "opticDisk", 'Transparency', 0.5);
+R = imresize(B, 4, 'nearest');
+imshow(R)

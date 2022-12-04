@@ -151,8 +151,8 @@ hold on;
 visboundaries(bw,'Color','r'); 
 %% seryjne obliczanie progu %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 path = "/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageDB/";
-info = dir(path);
-elemslist = natsort({info(:).name});
+infoIm = dir(path);
+elemslist = natsort({infoIm(:).name});
 elemslist(ismember(elemslist,{'.','..','.DS_Store'}))=[];
 prog = ones(length(elemslist), 1);
 for i = 1 : length(elemslist)
@@ -206,8 +206,8 @@ POROWNAJ_MASKI(p1, p2, 'folder');
 %% Normalize Ground Truth Mask
 path = "/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT/";
 savePath = "/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/TEST/";
-info = dir(path);
-elemslist = natsort({info(:).name});
+infoIm = dir(path);
+elemslist = natsort({infoIm(:).name});
 elemslist(ismember(elemslist,{'.','..','.DS_Store'}))=[];
 for i = 1 : length(elemslist)
     I = imread(path+elemslist{i});
@@ -224,4 +224,34 @@ for i = 1 : length(elemslist)
     end
     
     imwrite(I, savePath + b + '.png')
+end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Zmniejszenie rozdzielczości obrazów do uczenia
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+originImages = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageDB/';
+gtMaskImages = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT/';
+%% Oryginalne zdjęcia
+savePath = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/ImageDB_128/';
+infoIm = dir(originImages);
+elemslist = {infoIm(:).name};
+elemslist(ismember(elemslist,{'.','..','.DS_Store'}))=[];
+
+for i = 1 : length(elemslist)
+    filename = elemslist{i};
+    I_curr = imread(cat(2,originImages, filename));
+    I_new = imresize(I_curr, 0.25, 'nearest');
+    imwrite(I_new, cat(2, savePath, filename));
+end
+
+%% Maski GT zdjęć
+savePath = '/Users/wiktorkalaga/Documents/Zasoby do inżynierki/Projekt Inżynierski/MasksGT_128/';
+infoIm = dir(gtMaskImages);
+elemslist = {infoIm(:).name};
+elemslist(ismember(elemslist,{'.','..','.DS_Store'}))=[];
+
+for i = 1 : length(elemslist)
+    filename = elemslist{i};
+    I_curr = imread(cat(2,gtMaskImages, filename));
+    I_new = imresize(I_curr, 0.25, 'nearest');
+    imwrite(I_new, cat(2, savePath, filename));
 end
